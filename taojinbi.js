@@ -2,16 +2,20 @@
 auto() //开启无障碍服务 v1.7.3
 
 if (floaty && floaty.hasOwnProperty("checkPermission") && !floaty.checkPermission()) {
-    floaty.requestPermission(); toast("请先开启悬浮窗权限再运行,否则无法显示提示"); exit()
+    floaty.requestPermission();
+    toast("请先开启悬浮窗权限再运行,否则无法显示提示");
+    exit()
 }
 
 //===================用户可编辑参数===================
 //所有任务重复次数,解决新增任务问题
 var MAX_ALL_TASK_EPOCH = 2
-//浏览任务最大执行次数
+//浏览任务最大执行次数WAIT_SECONDS
 var MAX_EPOCH = 101
 //任务执行默认等待的时长 考虑到网络卡顿问题 默认15秒
-var wait_sec = 15
+var WAIT_SECONDS = 15
+// 单个任务最多执行次数，默认3次执行不完就跳过
+var SINGLE_TASK_MAX_LOOP = 3;
 //序列化数据到本地
 var storage = storages.create("javis486");
 //线程执行其任务
@@ -109,6 +113,7 @@ function get_task(key_reg_str, skip_reg) {
         if (!btn_desc) continue
         let txt_desc = btn_desc.text()
         let txt_topic = btn_topic.text()
+        toast_console(txt_desc, '----', txt_topic);
         if (skip_reg != undefined && skip_reg.test(txt_topic)) continue
         if (reg.test(txt_desc) || reg.test(txt_topic)) {
             toast_console(txt_topic)
@@ -122,7 +127,9 @@ function get_task(key_reg_str, skip_reg) {
 //淘金币获取奖励
 function get_rewards(reward) {
     if (reward) {
-        sleep(500); btn_click(text('领取奖励').findOne(1000)); sleep(3000) //等待调整布局 
+        sleep(500);
+        btn_click(text('领取奖励').findOne(1000));
+        sleep(3000) //等待调整布局
     }
 }
 
@@ -288,7 +295,7 @@ function browse_goodshop_task(not_key_reg_str) {
         }
         back(); sleep(800);
     }
-    wait(wait_sec); assure_back(input_value(ui.txt_task_list_ui_reg)); get_rewards(true)
+    wait(WAIT_SECONDS); assure_back(input_value(ui.txt_task_list_ui_reg)); get_rewards(true)
 }
 
 //去天猫红包任务
@@ -298,11 +305,14 @@ function tianmao_task() {
     sleep(4000)
 
     if (text('打开手机天猫APP').findOne(1500)) {
-        back(); sleep(1500); back(); wait(wait_sec)
+        back();
+        sleep(1500);
+        back();
+        wait(WAIT_SECONDS)
     }
     else if (text('攻略').findOne(4000)) {
         btn_click(textContains('继续逛逛').findOne(1000))
-        wait(wait_sec)
+        wait(WAIT_SECONDS)
     }
     assure_back(input_value(ui.txt_task_list_ui_reg)); get_rewards(true)
 }
@@ -375,7 +385,7 @@ function xiaoxiaole_task() {
     sleep(2000)
     //回到主页
     for (let i = 0; i < 6; i++) {
-        cs_click(1, '#8d5546', 0, 0, 0.1, 0.1); sleep(1000) //back(); 
+        cs_click(1, '#8d5546', 0, 0, 0.1, 0.1); sleep(1000) //back();
         if (cs_click(1, '#ffbd29', 0.2, 0.5, 0.45, 0.45)) break //橙色返回
         if (cs_click(1, '#965417', 0.2, 0.2, 0.6, 0.6, true)) break //咖啡色暂时返回
     }
@@ -519,7 +529,7 @@ function taojinbi_task() {
         }
         enter_taojinbi_task_list()
         if (ui.ck_simple_task.checked) {
-            do_simple_task(MAX_EPOCH, wait_sec, simple_task_reg_str, task_list_ui_reg, true)
+            do_simple_task(MAX_EPOCH, WAIT_SECONDS, simple_task_reg_str, task_list_ui_reg, true)
         }
         if (ui.ck_618_task.checked) {
             miaomiao618_tak()
